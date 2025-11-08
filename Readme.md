@@ -5,18 +5,20 @@
 
 ## Table of Contents 
 [Table of Contents](#table-of-contents)   
-[List of Figures](#list-of-figures)   
+[List of Figures](#list-of-figures)
 
-1. [Design proposal](#10-designproposal)
-2. [Libraries required](#20-librariesrequired)
-3. [Dataset(s)](#30-dataset(s))
-4. [Integration](#40-integration)
-   1. [Phase one](#41-phase-one)
-   2. [Phase two](#42-phase-two)
-   3. [Phase three](#43-phase-three)
-5. [Firmware code](#50-firmwarecode)
-6. [Acronyms](#60-acronyms)
-7. [References](#70-references)
+- [1.0 Design Proposal](#10-design-proposal)
+  - [1.1 Project Requirements and Specifications](#11-project-requirements-and-specifications)
+- [2.0 Libraries Required](#20-libraries-required)
+- [3.0 Dataset(s)](#30-datasets)
+- [4.0 Integration](#40-integration)
+  - [4.1 Phase One](#41-phase-one)
+  - [4.2 Phase Two](#42-phase-two)
+  - [4.3 Phase Three](#43-phase-three)
+- [5.0 Firmware Code](#50-firmware-code)
+  - [5.1 main.py](#51-mainpy)
+- [6.0 Acronyms](#60-acronyms)
+- [7.0 References](#70-references)
 
 ## List of Figures   
 [Figure 1: Gantt Chart 2023](#figure-1-gantt-chart-2023)     
