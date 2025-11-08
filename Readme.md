@@ -1,7 +1,7 @@
 # CSCI4050 - Visisign: ASL Translation project
 
 ## Proposal/Project Specifications
-[Link to proposal](wk01proposal.md).
+[Link to proposal](documents/Project%20Proposal.pdf).
 
 ## Table of Contents
 [Table of Contents](#table-of-contents)   
