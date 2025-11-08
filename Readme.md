@@ -1,9 +1,9 @@
-# CSCI4050 - Project ASL Translation: {title to be decided}
+# CSCI4050 - Visisign: ASL Translation project
 
-## Proposal/Project Specifications   
+## Proposal/Project Specifications
 [Link to proposal](wk01proposal.md).
 
-## Table of Contents 
+## Table of Contents
 [Table of Contents](#table-of-contents)   
 [List of Figures](#list-of-figures)
 
@@ -49,7 +49,9 @@ A. Stuff
 </b>
 
 ### 3.0 Dataset(s)
-Dataset 1:
+Possible Dataset 1: https://www.kaggle.com/datasets/prathumarikeri/american-sign-language-09az <br>
+This one is good 
+Posssible Dataset 2https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 
 <br>
 
 ## 4.0 Integration 
@@ -69,7 +71,8 @@ This is the last phase of development in which the finals parts of the code and 
 stuff <br>
 
 ## 6.0 Acronyms
-stuff <br>
+ML -> Machine Learning
+ASL -> American Sign Language
 
 ## 7.0 References   
 https://realpython.com/python-sockets/ </br>
