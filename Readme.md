@@ -1,7 +1,7 @@
 # CSCI4050 - Visisign: ASL Translation project
 
 ## Proposal/Project Specifications
-[Link to proposal](documents/Project%20Proposal.pdf).
+[Link to proposal](https://github.com/Megadast/CSCI4050-machine-learning/blob/main/Documents/Project%20Proposal.pdf)
 
 ## Table of Contents
 [Table of Contents](#table-of-contents)   
