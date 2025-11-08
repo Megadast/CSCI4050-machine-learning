@@ -1,5 +1,4 @@
-# CSCI4050 - Project {name to be decided}
-Title Page (1st odd page not numbered, X.0 sections begin on odd pages, otherwise double sided and numbered)
+# CSCI4050 - Project ASL Translation: {title to be decided}
 
 ## Proposal/Project Specifications   
 [Link to proposal](wk01proposal.md).
@@ -10,20 +9,23 @@ Title Page (1st odd page not numbered, X.0 sections begin on odd pages, otherwis
 
 1. [Design proposal](#1-designproposal)
 2. [Libraries required](#2-librariesrequired)
-3. [Integration](#3-integration)
-   1. [Phase one](#31-phase-one)
-   2. [Phase two](#32-phase-two)
-   3. [Phase three](#33-phase-three)
-4. [Firmware code](#40-firmwarecode)
-5. [Acronyms](#50-acronyms)
-6. [References](#60-references)
+3. [Dataset(s)](#3-dataset(s))
+4. [Integration](#4-integration)
+   1. [Phase one](#41-phase-one)
+   2. [Phase two](#42-phase-two)
+   3. [Phase three](#43-phase-three)
+5. [Firmware code](#50-firmwarecode)
+6. [Acronyms](#60-acronyms)
+7. [References](#70-references)
 
 ## List of Figures   
 [Figure 1: Gantt Chart 2023](#figure-1-gantt-chart-2023)     
 
-### 1 Design proposal
-*stuff*
-<br>
+### 1.0 Design proposal
+This project involves the development of a machine learning model capable of recognizing hand gestures connected to American Sign Language (ASL).
+The scope is to recognize letters and/or digits from images and possibly expand to simple phrases like "Hello" or "Goodbye".
+The system will take an image of a hand performing a sign as input and output the corresponding alphabet, number or simple word.
+The idea is to use static images at first and try to expand into live translation.
 <br>
 
 <b>Design Approach</b>
@@ -37,31 +39,35 @@ RaspberryPi--->Firebase; RaspberryPi--->Camera; RaspberryPi--->CustomPCB;CustomP
 1. a
 2. b
 
-### 2 Libraries required
+### 2.0 Libraries required
 Through our project we utilize different libraries
 These include:   
 <b>
 A. Stuff
 </b>
 
-## 3.0 Integration 
+### 3.0 Dataset(s)
+Dataset 1:
+<br>
 
-### 3.1 Phase one
+## 4.0 Integration 
+
+### 4.1 Phase one
 This phase of integration includes the following: </br>
 
-### 3.2 Phase two
+### 4.2 Phase two
 This phase two of integration includes the following:
 
-### 3.3 Phase three
+### 4.3 Phase three
 This is the last phase of development in which the finals parts of the code and project were finalized, here we:
 
-### 4.0 Firmware code   
+### 5.0 Firmware code   
 
-### 4.1 main.py
+### 5.1 main.py
 stuff <br>
 
-## 5.0 Acronyms
+## 6.0 Acronyms
 stuff <br>
 
-## 6.0 References   
+## 7.0 References   
 https://realpython.com/python-sockets/ </br>
