@@ -50,8 +50,9 @@ A. Stuff
 
 ### 3.0 Dataset(s)
 Possible Dataset 1: https://www.kaggle.com/datasets/prathumarikeri/american-sign-language-09az <br>
-This one is good 
-Posssible Dataset 2https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 
+This one is good and offers from A-Z and 0-9 in Sign Language. Perfect for ML training with picture <br>
+Posssible Dataset 2:https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 <br>
+This one is also very good and offers an even wider range of Sign Language, but it might be difficult to work with, and work better with pure AI instead. <br>
 <br>
 
 ## 4.0 Integration 
