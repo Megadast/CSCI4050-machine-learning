@@ -72,8 +72,8 @@ This is the last phase of development in which the finals parts of the code and 
 stuff <br>
 
 ## 6.0 Acronyms
-ML -> Machine Learning
-ASL -> American Sign Language
+ML -> Machine Learning <br>
+ASL -> American Sign Language <br>
 
 ## 7.0 References   
 https://realpython.com/python-sockets/ </br>
