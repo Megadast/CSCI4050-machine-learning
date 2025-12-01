@@ -30,26 +30,54 @@ The system will take an image of a hand performing a sign as input and output th
 The idea is to use static images at first and try to expand into live translation.
 <br>
 
-<b>Design Approach</b>
+<b>Design Approach (For now)</b>
 
 ```mermaid
-flowchart LR;Bluetooth--->RaspberryPi;Controller--->Bluetooth;
-RaspberryPi--->Firebase; RaspberryPi--->Camera; RaspberryPi--->CustomPCB;CustomPCB--->9DoF-IMU-Breakout;CustomPCB--->AtmosphericSensor;CustomPCB--->WaterLevelSensorBoard; RaspberryPi--->SparkFunAutopHAT;SparkFunAutopHAT--->ServoTrigger;ServoTrigger--->ServoMotor;SparkFunAutopHAT--->MotorDriver;MotorDriver--->Stepper;SparkFunAutopHAT--->ESCcontroller;ESCcontroller--->BrushlessMotor; 
+flowchart LR
+InputImage --> Preprocessing
+Preprocessing --> HandCrop
+HandCrop --> CNNModel
+CNNModel --> PredictionOutput
+PredictionOutput --> UserInterface
 ```
   
 ### 1.1 Project Requirements and Specifications   
-1. a
-2. b
+- Implement automated dataset downloading using Kaggle API
+- Preprocess images using PyTorch transforms
+- Train a CNN classifier capable of recognizing ASL (American Sign Language)
+- Build a prediction pipeline that supports folder-based batch testing
+- Implement simple automatic hand detection using OpenCV
+- Real-time recognition
 
-### 2.0 Libraries required
-Through our project we utilize different libraries
-These include:   
-<b>
-A. Stuff
+2.0 Libraries Required
+
+2.1 PyTorch <br>
+model training and inference
+
+2.2 torchvision <br>
+transformations, datasets
+
+2.3 numpy <br>
+numerical operations
+
+2.4 Pillow (PIL) <br>
+image IO
+
+2.5 OpenCV <br>
+simple hand detection & cropping
+
+2.6 python-dotenv <br>
+Kaggle API credential loading
+
+2.7 kaggle <br>
+dataset downloading
+
+2.8 scikit-learn<br>
+evaluation metrics
 </b>
 
 ### 3.0 Dataset(s)
-Possible Dataset 1: https://www.kaggle.com/datasets/prathumarikeri/american-sign-language-09az <br>
+Dataset 1 (Current): https://www.kaggle.com/datasets/prathumarikeri/american-sign-language-09az <br>
 This one is good and offers from A-Z and 0-9 in Sign Language. Perfect for ML training with picture <br>
 Posssible Dataset 2:https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 <br>
 This one is also very good and offers an even wider range of Sign Language, but it might be difficult to work with, and work better with pure AI instead. <br>
@@ -57,11 +85,21 @@ This one is also very good and offers an even wider range of Sign Language, but 
 
 ## 4.0 Integration 
 
-### 4.1 Phase one
-This phase of integration includes the following: </br>
+### 4.1 Phase One — Dataset + Baseline Model
+- Implemented automatic Kaggle dataset download / extraction
+- Loaded dataset using PyTorch's ImageFolder
+- Filtered classes to only 0–9 for proof of concept
+- Built a simple Convolutional Neural Network
+- Trained with adjustable epoch controls and live progress output
 
-### 4.2 Phase two
-This phase two of integration includes the following:
+### 4.2 Phase Two — Prediction Pipeline
+- Added predict.py to evaluate any image or folder of images
+- Implemented sorted testing using /test/ directory
+- Added basic hand cropping
+  - Use of HSV for skin detection
+- Try to solve issue when using real photos
+- Reports per-image predictions and test accuracy
+- Enables quick evaluation with real-world photos
 
 ### 4.3 Phase three
 This is the last phase of development in which the finals parts of the code and project were finalized, here we:
@@ -72,8 +110,17 @@ This is the last phase of development in which the finals parts of the code and 
 stuff <br>
 
 ## 6.0 Acronyms
-ML -> Machine Learning <br>
-ASL -> American Sign Language <br>
+ASL — American Sign Language <br>
+ML — Machine Learning <br>
+CNN — Convolutional Neural Network <br>
+HSV — Hue Saturation Value (color space used in skin detection) <br>
 
-## 7.0 References   
-https://realpython.com/python-sockets/ </br>
+## References
+Kaggle ASL Dataset:
+https://www.kaggle.com/datasets/prathumarikeri/american-sign-language-09az <br>
+Roboflow ASL Dataset:
+https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 <br>
+PyTorch Documentation:
+https://pytorch.org <br>
+OpenCV Documentation:
+https://docs.opencv.org <br>
