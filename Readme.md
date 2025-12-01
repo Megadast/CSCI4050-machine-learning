@@ -102,7 +102,13 @@ This one is also very good and offers an even wider range of Sign Language, but 
 - Enables quick evaluation with real-world photos
 
 ### 4.3 Phase three
-This is the last phase of development in which the finals parts of the code and project were finalized, here we:
+- Fixing bugs
+- Add real-time implementation
+
+### 4.4 Phase four
+- Double-checking
+- Fixing bufs
+- Create a presentation
 
 ### 5.0 Firmware code   
 
