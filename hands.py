@@ -1,38 +1,74 @@
+#hands.py
+
 import cv2
-import numpy as np
+import mediapipe as mp
 from PIL import Image
+import numpy as np
+import os
 
+mpHands = mp.solutions.hands
+mpDraw = mp.solutions.drawing_utils
 
-def simpleHandCrop(pilImage):
+'''
+Utilizing: https://mediapipe.readthedocs.io/en/latest/solutions/hands.html
+'''
+class MediaPipeHandDetector:
+    def __init__(self, maxHands=2, detectionConfidence=0.5, trackingConfidence=0.5):
+        self.hands = mpHands.Hands(
+            static_image_mode=True,
+            max_num_hands=maxHands,
+            min_detection_confidence=detectionConfidence,
+            min_tracking_confidence=trackingConfidence
+        )
 
-    img = np.array(pilImage)
-    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    def detectHands(self, pilImage):
+        """
+        Detects hands and returns:
+        - croppedHands: list of PIL images (cropped hand regions)
+        - annotatedImg: annotated image with bounding boxes + skeleton
+        """
+        img = np.array(pilImage)
+        imgRGB = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-    #Loose skin tone range (works for proof of concept)
-    lower = np.array([0, 20, 40])
-    upper = np.array([25, 255, 255])
+        results = self.hands.process(imgRGB)
 
-    mask = cv2.inRange(hsv, lower, upper)
+        annotatedImg = img.copy()
+        croppedHands = []
 
-    #Remove noise
-    mask = cv2.medianBlur(mask, 7)
+        if not results.multi_hand_landmarks:
+            return [], Image.fromarray(annotatedImg)
 
-    #Find contours
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    if len(contours) == 0:
-        print("[crop] No hand detected — using original image.")
-        return pilImage
+        h, w, _ = img.shape
 
-    #Largest contour = hand
-    contour = max(contours, key=cv2.contourArea)
-    x, y, w, h = cv2.boundingRect(contour)
+        for handLms in results.multi_hand_landmarks:
+            
+            #Draw landmarks on the annotated image
+            mpDraw.draw_landmarks(annotatedImg, handLms, mpHands.HAND_CONNECTIONS)
 
-    #Expand bounding box slightly
-    pad = int(min(w, h) * 0.2)
-    x = max(x - pad, 0)
-    y = max(y - pad, 0)
-    w = min(w + 2*pad, img.shape[1] - x)
-    h = min(h + 2*pad, img.shape[0] - y)
+            #Compute bounding box
+            x_coords = [lm.x * w for lm in handLms.landmark]
+            y_coords = [lm.y * h for lm in handLms.landmark]
 
-    crop = img[y:y+h, x:x+w]
-    return Image.fromarray(crop)
+            x_min, x_max = int(min(x_coords)), int(max(x_coords))
+            y_min, y_max = int(min(y_coords)), int(max(y_coords))
+
+            # Add padding
+            pad = int(0.2 * (x_max - x_min))
+            x_min = max(0, x_min - pad)
+            y_min = max(0, y_min - pad)
+            x_max = min(w, x_max + pad)
+            y_max = min(h, y_max + pad)
+
+            #Draw bounding box
+            cv2.rectangle(
+                annotatedImg,
+                (x_min, y_min),
+                (x_max, y_max),
+                (0, 255, 0),
+                2
+            )
+
+            crop = img[y_min:y_max, x_min:x_max]
+            croppedHands.append(Image.fromarray(crop))
+
+        return croppedHands, Image.fromarray(annotatedImg)

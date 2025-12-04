@@ -7,14 +7,12 @@ from torchvision import transforms
 
 from utils import getDevice
 from main import AslClassifier
-from hands import MediaPipeHandDetector
+from hands import simpleHandCrop
 
 
 MODEL_PATH = "models/asl_best.pth"
 TEST_DIR = "test"
-OUTPUT_DIR = "test/output"
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 transform = transforms.Compose([
     transforms.Resize((128, 128)),
@@ -34,28 +32,12 @@ def loadModel(classNames):
     return model, device
 
 
-detector = MediaPipeHandDetector()
-
-
 def predictSingle(model, device, imgPath, classNames):
     img = Image.open(imgPath).convert("RGB")
 
-    #Detect & crop
-    croppedHands, annotatedImg = detector.detectHands(img)
-
-    #Save annotated image
-    outName = os.path.basename(imgPath)
-    savePath = os.path.join(OUTPUT_DIR, f"annotated_{outName}")
-    annotatedImg.save(savePath)
-
-    if len(croppedHands) == 0:
-        print(f"[predict] No hands found in {imgPath}.")
-        return None
-
-    #Classify first detected hand
-    handImg = croppedHands[0]
-
-    x = transform(handImg).unsqueeze(0).to(device)
+    cropped = simpleHandCrop(img)
+    
+    x = transform(cropped).unsqueeze(0).to(device)
 
     with torch.no_grad():
         logits = model(x)
@@ -65,17 +47,15 @@ def predictSingle(model, device, imgPath, classNames):
 
 
 if __name__ == "__main__":
-    classNames = [str(i) for i in range(10)]  # 0–9 only
+    classNames = [str(i) for i in range(10)]  #only digits 0–9
     model, device = loadModel(classNames)
 
     if not os.path.isdir(TEST_DIR):
         print(f"[predict] Test folder '{TEST_DIR}' not found.")
-        exit()
 
     files = [f for f in os.listdir(TEST_DIR) if f.lower().endswith((".jpg", ".png", ".jpeg"))]
     if not files:
         print("[predict] No images found in test folder.")
-        exit()
 
     correct = 0
     total = 0
@@ -85,23 +65,16 @@ if __name__ == "__main__":
     for file in files:
         imgPath = os.path.join(TEST_DIR, file)
 
-        #Ignore output folder
-        if "output" in imgPath:
-            continue
-
-        #Extract ground truth label from filename
+        #Extract ground truth label from file name: test_0.jpg → "0"
         trueLabel = file.split("_")[-1].split(".")[0]
 
         pred = predictSingle(model, device, imgPath, classNames)
 
         print(f"Image: {file} | True: {trueLabel} | Predicted: {pred}")
 
-        if pred is not None and pred == trueLabel:
+        if pred == trueLabel:
             correct += 1
         total += 1
 
-    if total > 0:
-        print("\n[predict] Done.")
-        acc = (correct / total) * 100
-        print(f"[predict] Accuracy: {correct}/{total} ({acc:.2f}%)")
-        print(f"[predict] Annotated images saved in: {OUTPUT_DIR}/")
+    print("\n[predict] Done.")
+    print(f"[predict] Accuracy: {correct}/{total} ({(correct/total)*100:.2f}%)")
