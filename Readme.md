@@ -3,6 +3,9 @@
 ## Proposal/Project Specifications
 [Link to proposal](https://github.com/Megadast/CSCI4050-machine-learning/blob/main/Documents/Project%20Proposal.pdf)
 
+## Project Submission and details page
+[Link to proposal](https://docs.google.com/document/d/1fHhpxRTeGKunU2NyJhxFJ5Jxy0uY3lJdPAncQGu8nMs/edit?tab=t.0)
+
 ## Table of Contents
 [Table of Contents](#table-of-contents)   
 [List of Figures](#list-of-figures)
