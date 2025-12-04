@@ -1,4 +1,3 @@
-.env
 kaggle.json
 *.zip
 *.tar.gz
