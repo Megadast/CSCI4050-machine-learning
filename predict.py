@@ -1,6 +1,7 @@
 #predict.py
 
 import os
+import re
 import torch
 from PIL import Image
 from torchvision import transforms
@@ -23,6 +24,14 @@ transform = transforms.Compose([
 ])
 
 
+def extractTrueLabel(filename):
+    #Extract first number in any filename.
+    match = re.search(r"\d+", filename)
+    if match:
+        return match.group(0)
+    return None
+
+
 def loadModel(classNames):
     device = getDevice()
     numClasses = len(classNames)
@@ -39,7 +48,7 @@ detector = MediaPipeHandDetector()
 
 def predictSingle(model, device, imgPath, classNames):
     img = Image.open(imgPath).convert("RGB")
-
+    
     #Detect & crop
     croppedHands, annotatedImg = detector.detectHands(img)
 
@@ -65,7 +74,8 @@ def predictSingle(model, device, imgPath, classNames):
 
 
 if __name__ == "__main__":
-    classNames = [str(i) for i in range(10)]  # 0–9 only
+    #Digits only (For now)
+    classNames = [str(i) for i in range(10)]
     model, device = loadModel(classNames)
 
     if not os.path.isdir(TEST_DIR):
@@ -73,6 +83,7 @@ if __name__ == "__main__":
         exit()
 
     files = [f for f in os.listdir(TEST_DIR) if f.lower().endswith((".jpg", ".png", ".jpeg"))]
+
     if not files:
         print("[predict] No images found in test folder.")
         exit()
@@ -86,17 +97,19 @@ if __name__ == "__main__":
         imgPath = os.path.join(TEST_DIR, file)
 
         #Ignore output folder
-        if "output" in imgPath:
+        if "annotated_" in file:
             continue
 
-        #Extract ground truth label from filename
-        trueLabel = file.split("_")[-1].split(".")[0]
+        trueLabel = extractTrueLabel(file)
+        if trueLabel is None:
+            print(f"[predict] WARNING: No numeric label in filename → {file}")
+            continue
 
         pred = predictSingle(model, device, imgPath, classNames)
 
         print(f"Image: {file} | True: {trueLabel} | Predicted: {pred}")
 
-        if pred is not None and pred == trueLabel:
+        if pred == trueLabel:
             correct += 1
         total += 1
 

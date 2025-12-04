@@ -4,7 +4,6 @@ import cv2
 import mediapipe as mp
 from PIL import Image
 import numpy as np
-import os
 
 mpHands = mp.solutions.hands
 mpDraw = mp.solutions.drawing_utils
@@ -52,11 +51,11 @@ class MediaPipeHandDetector:
             x_min, x_max = int(min(x_coords)), int(max(x_coords))
             y_min, y_max = int(min(y_coords)), int(max(y_coords))
 
-            # Add padding
-            pad = int(0.2 * (x_max - x_min))
+            #Add padding
+            pad = int(0.1 * (x_max - x_min))
             x_min = max(0, x_min - pad)
-            y_min = max(0, y_min - pad)
             x_max = min(w, x_max + pad)
+            y_min = max(0, y_min - pad)
             y_max = min(h, y_max + pad)
 
             #Draw bounding box
@@ -68,6 +67,7 @@ class MediaPipeHandDetector:
                 2
             )
 
+            #Crop the hand region
             crop = img[y_min:y_max, x_min:x_max]
             croppedHands.append(Image.fromarray(crop))
 
