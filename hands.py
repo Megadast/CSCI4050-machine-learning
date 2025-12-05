@@ -47,30 +47,30 @@ class MediaPipeHandDetector:
             mpDraw.draw_landmarks(annotatedImg, handLms, mpHands.HAND_CONNECTIONS)
 
             #Compute bounding box
-            x_coords = [lm.x * w for lm in handLms.landmark]
-            y_coords = [lm.y * h for lm in handLms.landmark]
+            xCoords = [lm.x * w for lm in handLms.landmark]
+            yCoords = [lm.y * h for lm in handLms.landmark]
 
-            x_min, x_max = int(min(x_coords)), int(max(x_coords))
-            y_min, y_max = int(min(y_coords)), int(max(y_coords))
+            xMin, xMax = int(min(xCoords)), int(max(xCoords))
+            yMin, yMax = int(min(yCoords)), int(max(yCoords))
 
             #Add padding
-            pad = int(0.1 * (x_max - x_min))
-            x_min = max(0, x_min - pad)
-            x_max = min(w, x_max + pad)
-            y_min = max(0, y_min - pad)
-            y_max = min(h, y_max + pad)
+            pad = int(0.1 * (xMax - xMin))
+            xMin = max(0, xMin - pad)
+            xMax = min(w, xMax + pad)
+            yMin = max(0, yMin - pad)
+            yMax = min(h, yMax + pad)
 
             #Draw bounding box
             cv2.rectangle(
                 annotatedImg,
-                (x_min, y_min),
-                (x_max, y_max),
+                (xMin, yMin),
+                (xMax, yMax),
                 (0, 255, 0),
                 2
             )
 
             #Crop the hand region
-            crop = img[y_min:y_max, x_min:x_max]
+            crop = img[yMin:yMax, xMin:xMax]
             croppedHands.append(Image.fromarray(crop))
 
         return croppedHands, Image.fromarray(annotatedImg)

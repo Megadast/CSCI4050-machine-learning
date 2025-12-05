@@ -8,8 +8,6 @@ import torch
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
 from dotenv import load_dotenv
-from sklearn.model_selection import train_test_split
-
 
 DATASET_SLUG = "prathumarikeri/american-sign-language-09az"
 DEFAULT_DATA_DIR = "data/asl"
@@ -101,17 +99,20 @@ def getDataLoaders(
                         pass
 
     print("[utils] Digits-only subset prepared.")
-
+    
     print("[utils] Preparing transforms...")
-
-    transform = transforms.Compose([
-        transforms.Resize((128, 128)),
+    
+    imagenetTransform = transforms.Compose([
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225]
+        )
     ])
 
     print("[utils] Loading ImageFolder (digits only)...")
-    fullDataset = datasets.ImageFolder(filteredRoot, transform=transform)
+    fullDataset = datasets.ImageFolder(filteredRoot, transform=imagenetTransform)
 
     classNames = fullDataset.classes
     print(f"[utils] Classes included: {classNames}")
@@ -139,6 +140,7 @@ def getDataLoaders(
     print("[utils] DataLoaders ready.")
 
     return trainLoader, valLoader, classNames
+
 
 def getDevice() -> torch.device:
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")

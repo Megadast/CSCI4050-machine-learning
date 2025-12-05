@@ -7,7 +7,7 @@ from PIL import Image
 from torchvision import transforms
 
 from utils import getDevice
-from main import AslClassifier
+from main import AslResNet
 from hands import MediaPipeHandDetector
 
 
@@ -17,10 +17,13 @@ OUTPUT_DIR = "test/output"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-transform = transforms.Compose([
-    transforms.Resize((128, 128)),
+imagenetTransform = transforms.Compose([
+    transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+    )
 ])
 
 
@@ -35,18 +38,18 @@ def extractTrueLabel(filename):
 def loadModel(classNames):
     device = getDevice()
     numClasses = len(classNames)
-
-    model = AslClassifier(numClasses)
+    
+    model = AslResNet(numClasses)
     model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     model.to(device)
     model.eval()
     return model, device
 
-
 detector = MediaPipeHandDetector()
 
 
 def predictSingle(model, device, imgPath, classNames):
+    
     img = Image.open(imgPath).convert("RGB")
     
     #Detect & crop
@@ -64,7 +67,7 @@ def predictSingle(model, device, imgPath, classNames):
     #Classify first detected hand
     handImg = croppedHands[0]
 
-    x = transform(handImg).unsqueeze(0).to(device)
+    x = imagenetTransform(handImg).unsqueeze(0).to(device)
 
     with torch.no_grad():
         logits = model(x)

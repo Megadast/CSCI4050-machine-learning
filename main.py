@@ -8,33 +8,27 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torchvision import models, transforms
+
 from utils import downloadAslDataset, getDataLoaders, getDevice
 
 
-class AslClassifier(nn.Module):
-    def __init__(self, numClasses: int):
+class AslResNet(nn.Module):
+    def __init__(self, numClasses):
         super().__init__()
-        self.features = nn.Sequential(
-            nn.Conv2d(3, 16, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(16, 32, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(32, 64, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-        )
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(64 * 16 * 16, 256),
-            nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(256, numClasses),
-        )
+        self.model = models.resnet18(weights="IMAGENET1K_V1")
+
+        for param in self.model.parameters():
+            param.requires_grad = False
+
+        for param in self.model.layer4.parameters():
+            param.requires_grad = True
+
+        inFeatures = self.model.fc.in_features
+        self.model.fc = nn.Linear(inFeatures, numClasses)
 
     def forward(self, x):
-        return self.classifier(self.features(x))
+        return self.model(x)
 
 
 def computeAccuracy(logits, targets):
@@ -59,7 +53,7 @@ def trainOneEpoch(model, loader, optimizer, criterion, device):
         optimizer.step()
 
         lossTotal += loss.item()
-        accTotal += (torch.argmax(outputs, dim=1) == labels).float().mean().item()
+        accTotal += computeAccuracy(outputs, labels).item()
 
         if batchIndex % 10 == 0:
             print(
@@ -88,7 +82,7 @@ def evaluate(model, loader, criterion, device):
             loss = criterion(outputs, labels)
 
             lossTotal += loss.item()
-            accTotal += (torch.argmax(outputs, dim=1) == labels).float().mean().item()
+            accTotal += computeAccuracy(outputs, labels).item()
 
             if batchIndex % 10 == 0:
                 print(
@@ -114,11 +108,14 @@ if __name__ == "__main__":
     trainLoader, valLoader, classNames = getDataLoaders()
     numClasses = len(classNames)
 
-    model = AslClassifier(numClasses).to(device)
+    model = AslResNet(numClasses).to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=1e-4)
+    optimizer = optim.Adam(
+        filter(lambda p: p.requires_grad, model.parameters()),
+        lr=1e-4
+    )
 
-    maxEpochs = 10
+    maxEpochs = 6
 
     print(f"[main] Beginning training — total epochs: {maxEpochs}")
 
