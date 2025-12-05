@@ -12,7 +12,9 @@ mpDraw = mp.solutions.drawing_utils
 Utilizing: https://mediapipe.readthedocs.io/en/latest/solutions/hands.html
 '''
 class MediaPipeHandDetector:
-    def __init__(self, maxHands=2, detectionConfidence=0.5, trackingConfidence=0.5):
+    def __init__(self, maxHands=2, 
+        detectionConfidence=0.5, 
+        trackingConfidence=0.5):
         self.hands = mpHands.Hands(
             static_image_mode=True,
             max_num_hands=maxHands,
