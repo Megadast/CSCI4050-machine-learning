@@ -1,0 +1,9 @@
+.env
+kaggle.json
+*.zip
+*.tar.gz
+ASL/
+__pycache__/
+.ipynb_checkpoints/
+data/
+models/
