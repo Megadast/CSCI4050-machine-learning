@@ -103,8 +103,17 @@ if __name__ == "__main__":
     device = getDevice()
     print(f"[main] Device: {device}")
 
+    #STEP 1 — Download if not present
     downloadAslDataset()
 
+    #STEP 2 — check cropped otherwise run preprocessing
+    if not os.path.isdir("data"):
+        print("[main] Cropped dataset not found. Running preprocess_coco.py...")
+        os.system("python preprocess_coco.py")
+    else:
+        print("[main] Cropped dataset found. Skipping preprocessing.")
+
+    #STEP 3 — Load data
     trainLoader, valLoader, classNames = getDataLoaders()
     numClasses = len(classNames)
 
@@ -116,10 +125,9 @@ if __name__ == "__main__":
     )
 
     maxEpochs = 6
+    print(f"[main] Beginning training — epochs: {maxEpochs}")
 
-    print(f"[main] Beginning training — total epochs: {maxEpochs}")
-
-    bestValAcc = 0.0
+    bestValAcc = 0
 
     for epoch in range(maxEpochs):
         print(f"\n[main] === Epoch {epoch+1}/{maxEpochs} ===")
@@ -128,7 +136,7 @@ if __name__ == "__main__":
         valLoss, valAcc, yTrue, yPred = evaluate(model, valLoader, criterion, device)
 
         print(
-            f"[main] Epoch {epoch + 1}/{maxEpochs} Complete | "
+            f"[main] Epoch {epoch+1} | "
             f"Train Loss {trainLoss:.4f} Acc {trainAcc:.4f} | "
             f"Val Loss {valLoss:.4f} Acc {valAcc:.4f}"
         )
@@ -136,7 +144,7 @@ if __name__ == "__main__":
         if valAcc > bestValAcc:
             bestValAcc = valAcc
             os.makedirs("models", exist_ok=True)
-            savePath = os.path.join("models", "asl_best.pth")
+            savePath = "models/asl_best.pth"
             torch.save(model.state_dict(), savePath)
             print(f"[main] Saved best model → {savePath}")
 

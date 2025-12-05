@@ -1,108 +1,56 @@
 #utils.py
-
 import os
-import subprocess
-from typing import Tuple
-
-import torch
-from torch.utils.data import DataLoader, random_split
-from torchvision import datasets, transforms
+import shutil
 from dotenv import load_dotenv
+from roboflow import Roboflow
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader, random_split
+import torch
 
-DATASET_SLUG = "prathumarikeri/american-sign-language-09az"
-DEFAULT_DATA_DIR = "data/asl"
+DEFAULT_DOWNLOADED = "data_downloaded"
+DEFAULT_DATA_DIR = "data"
 
 
-def ensureKaggleCredentials():
+def downloadAslDataset():
     load_dotenv()
-    username = os.getenv("KAGGLE_USERNAME")
-    key = os.getenv("KAGGLE_KEY")
-    apiToken = os.getenv("KAGGLE_API_TOKEN")
+    apiKey = os.getenv("ROBOFLOW_API_KEY")
+    workspace = os.getenv("ROBOFLOW_WORKSPACE")
+    projectName = os.getenv("ROBOFLOW_PROJECT")
+    versionNum = int(os.getenv("ROBOFLOW_VERSION", "1"))
 
-    if key is None and apiToken is not None:
-        key = apiToken
-        os.environ["KAGGLE_KEY"] = key
+    if apiKey is None:
+        raise RuntimeError("ROBOFLOW_API_KEY missing in .env")
 
-    if username is None:
-        raise RuntimeError("KAGGLE_USERNAME missing in .env")
-    if key is None:
-        raise RuntimeError("KAGGLE_KEY or KAGGLE_API_TOKEN missing in .env")
-
-    os.environ["KAGGLE_USERNAME"] = username
-    os.environ["KAGGLE_KEY"] = key
-
-
-def downloadAslDataset(dataDir: str = DEFAULT_DATA_DIR):
-    ensureKaggleCredentials()
-    os.makedirs(dataDir, exist_ok=True)
-
-    if any(os.scandir(dataDir)):
-        print(f"[utils] Dataset already exists in {dataDir}")
+    if os.path.isdir(DEFAULT_DOWNLOADED):
+        print("[utils] Dataset already downloaded")
         return
 
-    print(f"[utils] Downloading dataset into {dataDir}")
+    print("[utils] Downloading dataset from Roboflow...")
 
-    cmd = [
-        "kaggle",
-        "datasets",
-        "download",
-        "-d",
-        DATASET_SLUG,
-        "-p",
-        dataDir,
-        "--unzip",
-    ]
+    rf = Roboflow(api_key=apiKey)
+    project = rf.workspace(workspace).project(projectName)
+    version = project.version(versionNum)
 
-    try:
-        subprocess.run(cmd, check=True)
-    except FileNotFoundError:
-        raise RuntimeError("Kaggle CLI not installed")
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"Kaggle download failed: {e}")
+    ds = version.download("coco")
 
-    print("[utils] Download completed")
+    # Rename folder to data_downloaded/
+    folderName = ds.location
+    if os.path.isdir(folderName):
+        os.rename(folderName, DEFAULT_DOWNLOADED)
+
+    print("[utils] Download complete →", DEFAULT_DOWNLOADED)
+
 
 def getDataLoaders(
     dataDir: str = DEFAULT_DATA_DIR,
     batchSize: int = 32,
 ):
-    print(f"[utils] Checking dataset folder: {dataDir}")
+    if not os.path.isdir(dataDir):
+        raise RuntimeError(f"Dataset not found. Run preprocess_coco.py first.")
 
-    rootCandidates = os.listdir(dataDir)
-    if len(rootCandidates) == 1:
-        potentialPath = os.path.join(dataDir, rootCandidates[0])
-        if os.path.isdir(potentialPath):
-            dataDir = potentialPath
+    print(f"[utils] Loading dataset from: {dataDir}")
 
-    print(f"[utils] Dataset root: {dataDir}")
-    print("[utils] Filtering to digits 0–9 only...")
-
-    digitFolders = [str(i) for i in range(10)]
-
-    filteredRoot = os.path.join(dataDir, "_digits_only")
-    os.makedirs(filteredRoot, exist_ok=True)
-
-    for d in digitFolders:
-        src = os.path.join(dataDir, d)
-        dst = os.path.join(filteredRoot, d)
-        if os.path.isdir(src):
-            if not os.path.isdir(dst):
-                os.makedirs(dst)
-            for fname in os.listdir(src):
-                srcFile = os.path.join(src, fname)
-                dstFile = os.path.join(dst, fname)
-                if not os.path.exists(dstFile):
-                    try:
-                        import shutil
-                        shutil.copy(srcFile, dstFile)
-                    except:
-                        pass
-
-    print("[utils] Digits-only subset prepared.")
-    
-    print("[utils] Preparing transforms...")
-    
-    imagenetTransform = transforms.Compose([
+    transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize(
@@ -111,36 +59,28 @@ def getDataLoaders(
         )
     ])
 
-    print("[utils] Loading ImageFolder (digits only)...")
-    fullDataset = datasets.ImageFolder(filteredRoot, transform=imagenetTransform)
+    dataset = datasets.ImageFolder(dataDir, transform=transform)
+    classNames = dataset.classes
 
-    classNames = fullDataset.classes
-    print(f"[utils] Classes included: {classNames}")
+    print(f"[utils] Classes found: {classNames}")
 
-    totalSize = len(fullDataset)
-    valSize = int(totalSize * 0.2)
-    trainSize = totalSize - valSize
+    total = len(dataset)
+    valSize = int(total * 0.2)
+    trainSize = total - valSize
 
-    print(f"[utils] Splitting dataset → Train: {trainSize}, Val: {valSize}")
+    print(f"[utils] Train: {trainSize}, Validation: {valSize}")
 
-    trainDataset, valDataset = random_split(
-        fullDataset,
+    trainSet, valSet = random_split(
+        dataset,
         [trainSize, valSize],
-        generator=torch.Generator().manual_seed(42)
+        generator=torch.Generator().manual_seed(42),
     )
 
-    print("[utils] Split complete.")
-    print(f"[utils] Train size: {len(trainDataset)}")
-    print(f"[utils] Val size: {len(valDataset)}")
-
-    print("[utils] Creating DataLoaders...")
-    trainLoader = DataLoader(trainDataset, batch_size=batchSize, shuffle=True, num_workers=0)
-    valLoader = DataLoader(valDataset, batch_size=batchSize, shuffle=False, num_workers=0)
-
-    print("[utils] DataLoaders ready.")
+    trainLoader = DataLoader(trainSet, batch_size=batchSize, shuffle=True, num_workers=0)
+    valLoader = DataLoader(valSet, batch_size=batchSize, shuffle=False, num_workers=0)
 
     return trainLoader, valLoader, classNames
 
 
-def getDevice() -> torch.device:
+def getDevice():
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")

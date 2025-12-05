@@ -1,21 +1,27 @@
 #predict.py
 
 import os
-import re
+import json
+import shutil
 import torch
 from PIL import Image
+from tqdm import tqdm
 from torchvision import transforms
 
-from utils import getDevice
+from utils import getDevice, getDataLoaders
 from main import AslResNet
 from hands import MediaPipeHandDetector
 
 
-MODEL_PATH = "models/asl_best.pth"
-TEST_DIR = "test"
-OUTPUT_DIR = "test/output"
+RAW_TEST_DIR = "data_downloaded/test"
+ANNOT_FILE = os.path.join(RAW_TEST_DIR, "_annotations.coco.json")
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+COCO_OUTPUT_DIR = "test_output"
+REAL_INPUT_DIR = "real"
+REAL_OUTPUT_DIR = "real/output"
+
+os.makedirs(COCO_OUTPUT_DIR, exist_ok=True)
+os.makedirs(REAL_OUTPUT_DIR, exist_ok=True)
 
 imagenetTransform = transforms.Compose([
     transforms.Resize((224, 224)),
@@ -26,98 +32,122 @@ imagenetTransform = transforms.Compose([
     )
 ])
 
+def getTrueLabelFromFilename(name):
+    #Extracts first number or letter sequence
+    base = os.path.splitext(name)[0]
 
-def extractTrueLabel(filename):
-    #Extract first number in any filename.
-    match = re.search(r"\d+", filename)
-    if match:
-        return match.group(0)
-    return None
+    #If format is test_A or test_hello
+    parts = base.split("_")
+    if len(parts) > 1:
+        return parts[1]
 
+    #If filename is "hello.jpg"
+    return parts[0]
 
-def loadModel(classNames):
+def loadModel():
+    _, _, classNames = getDataLoaders()
     device = getDevice()
     numClasses = len(classNames)
-    
+
     model = AslResNet(numClasses)
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+    model.load_state_dict(torch.load("models/asl_best.pth", map_location=device))
     model.to(device)
     model.eval()
-    return model, device
+    return model, device, classNames
 
 detector = MediaPipeHandDetector()
 
-
-def predictSingle(model, device, imgPath, classNames):
-    
-    img = Image.open(imgPath).convert("RGB")
-    
-    #Detect & crop
-    croppedHands, annotatedImg = detector.detectHands(img)
-
-    #Save annotated image
-    outName = os.path.basename(imgPath)
-    savePath = os.path.join(OUTPUT_DIR, f"annotated_{outName}")
-    annotatedImg.save(savePath)
-
-    if len(croppedHands) == 0:
-        print(f"[predict] No hands found in {imgPath}.")
-        return None
-
-    #Classify first detected hand
-    handImg = croppedHands[0]
-
-    x = imagenetTransform(handImg).unsqueeze(0).to(device)
-
+#Image prediction
+def predictImage(model, device, img, classNames):
+    x = imagenetTransform(img).unsqueeze(0).to(device)
     with torch.no_grad():
         logits = model(x)
-        predIndex = torch.argmax(logits, dim=1).item()
+        idx = torch.argmax(logits, dim=1).item()
+    return classNames[idx]
 
-    return classNames[predIndex]
+#COCO dataset
+def predictCOCO(model, device, classNames):
+    print("\n[predict] Running COCO testset evaluation...")
 
+    with open(ANNOT_FILE, "r") as f:
+        coco = json.load(f)
 
-if __name__ == "__main__":
-    #Digits only (For now)
-    classNames = [str(i) for i in range(10)]
-    model, device = loadModel(classNames)
-
-    if not os.path.isdir(TEST_DIR):
-        print(f"[predict] Test folder '{TEST_DIR}' not found.")
-        exit()
-
-    files = [f for f in os.listdir(TEST_DIR) if f.lower().endswith((".jpg", ".png", ".jpeg"))]
-
-    if not files:
-        print("[predict] No images found in test folder.")
-        exit()
+    images = {img["id"]: img for img in coco["images"]}
+    categories = {cat["id"]: cat["name"] for cat in coco["categories"]}
 
     correct = 0
     total = 0
 
-    print(f"[predict] Testing {len(files)} images...\n")
+    for ann in tqdm(coco["annotations"]):
+        imgInfo = images[ann["image_id"]]
+        fileName = imgInfo["file_name"]
+        trueLabel = categories[ann["category_id"]]
+
+        srcPath = os.path.join(RAW_TEST_DIR, fileName)
+        if not os.path.isfile(srcPath):
+            continue
+
+        img = Image.open(srcPath).convert("RGB")
+
+        x, y, w, h = ann["bbox"]
+        x, y, w, h = int(x), int(y), int(w), int(h)
+        crop = img.crop((x, y, x + w, y + h))
+
+        predicted = predictImage(model, device, crop, classNames)
+        total += 1
+        if predicted == trueLabel:
+            correct += 1
+
+        #Move crop into folder named by predicted class
+        classDir = os.path.join(COCO_OUTPUT_DIR, predicted)
+        os.makedirs(classDir, exist_ok=True)
+
+        crop.save(os.path.join(classDir, fileName))
+
+    acc = (correct / total * 100) if total > 0 else 0
+    print(f"[COCO] Accuracy: {correct}/{total} ({acc:.2f}%)")
+    print(f"[COCO] Cropped predictions organized inside: {COCO_OUTPUT_DIR}/")
+    
+#REAL dataset
+def predictReal(model, device, classNames):
+    if not os.path.isdir(REAL_INPUT_DIR):
+        print("[real] No real/ folder found. Skipping real-world testing.")
+        return
+
+    print("\n[predict] Running real-world evaluation")
+    
+    #TEMP
+    print("[predict] TODO: FIX THIS, gives annotation, but prediction is wrong.\n")
+
+    files = [f for f in os.listdir(REAL_INPUT_DIR)
+             if f.lower().endswith((".jpg", ".png", ".jpeg"))]
 
     for file in files:
-        imgPath = os.path.join(TEST_DIR, file)
+        path = os.path.join(REAL_INPUT_DIR, file)
+        img = Image.open(path).convert("RGB")
 
-        #Ignore output folder
-        if "annotated_" in file:
+        # MediaPipe detection (for skeleton/box only)
+        croppedHands, annotatedImg = detector.detectHands(img)
+
+        # Always save annotated image (even if detection fails)
+        annotatedSavePath = os.path.join(REAL_OUTPUT_DIR, f"annotated_{file}")
+        annotatedImg.save(annotatedSavePath)
+
+        if len(croppedHands) == 0:
+            print(f"[real] {file} | No hand detected | Output saved: annotated_{file}")
             continue
 
-        trueLabel = extractTrueLabel(file)
-        if trueLabel is None:
-            print(f"[predict] WARNING: No numeric label in filename → {file}")
-            continue
+        # Use first detected hand for prediction
+        crop = croppedHands[0]
+        predicted = predictImage(model, device, crop, classNames)
+        trueLabel = getTrueLabelFromFilename(file)
 
-        pred = predictSingle(model, device, imgPath, classNames)
+    print(f"[real] Annotated images saved in: {REAL_OUTPUT_DIR}/")
+    
+if __name__ == "__main__":
+    model, device, classNames = loadModel()
 
-        print(f"Image: {file} | True: {trueLabel} | Predicted: {pred}")
+    predictCOCO(model, device, classNames)
+    predictReal(model, device, classNames)
 
-        if pred == trueLabel:
-            correct += 1
-        total += 1
-
-    if total > 0:
-        print("\n[predict] Done.")
-        acc = (correct / total) * 100
-        print(f"[predict] Accuracy: {correct}/{total} ({acc:.2f}%)")
-        print(f"[predict] Annotated images saved in: {OUTPUT_DIR}/")
+    print("\n[predict] All evaluations complete.")
