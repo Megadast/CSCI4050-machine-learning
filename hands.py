@@ -12,11 +12,13 @@ mpDraw = mp.solutions.drawing_utils
 Utilizing: https://mediapipe.readthedocs.io/en/latest/solutions/hands.html
 '''
 class MediaPipeHandDetector:
-    def __init__(self, maxHands=2, 
-        detectionConfidence=0.5, 
-        trackingConfidence=0.5):
+    def __init__(self, maxHands=2,
+        detectionConfidence=0.5,
+        trackingConfidence=0.5,
+        static_image_mode=True):
+        # Allow caller to choose static_image_mode (False is better for video)
         self.hands = mpHands.Hands(
-            static_image_mode=True,
+            static_image_mode=static_image_mode,
             max_num_hands=maxHands,
             min_detection_confidence=detectionConfidence,
             min_tracking_confidence=trackingConfidence
@@ -46,19 +48,34 @@ class MediaPipeHandDetector:
             #Draw landmarks on the annotated image
             mpDraw.draw_landmarks(annotatedImg, handLms, mpHands.HAND_CONNECTIONS)
 
-            #Compute bounding box
+            #Compute bounding box from landmarks
             xCoords = [lm.x * w for lm in handLms.landmark]
             yCoords = [lm.y * h for lm in handLms.landmark]
 
             xMin, xMax = int(min(xCoords)), int(max(xCoords))
             yMin, yMax = int(min(yCoords)), int(max(yCoords))
 
-            #Add padding
-            pad = int(0.1 * (xMax - xMin))
-            xMin = max(0, xMin - pad)
-            xMax = min(w, xMax + pad)
-            yMin = max(0, yMin - pad)
-            yMax = min(h, yMax + pad)
+            # Improved padding: make crop square-ish and larger to capture full hand
+            hand_width = xMax - xMin
+            hand_height = yMax - yMin
+            max_dim = max(hand_width, hand_height)
+            
+            # Add 30% padding around hand for context
+            pad = int(0.3 * max_dim)
+            
+            # Center the hand in the padding
+            center_x = (xMin + xMax) // 2
+            center_y = (yMin + yMax) // 2
+            half_size = (max_dim + 2 * pad) // 2
+            
+            xMin = max(0, center_x - half_size)
+            xMax = min(w, center_x + half_size)
+            yMin = max(0, center_y - half_size)
+            yMax = min(h, center_y + half_size)
+            
+            # Ensure we have a valid crop
+            if xMax <= xMin or yMax <= yMin:
+                continue
 
             #Draw bounding box
             cv2.rectangle(

@@ -149,4 +149,4 @@ if __name__ == "__main__":
             print(f"[main] Saved best model → {savePath}")
 
     print("\n[main] Training complete — running prediction tests...\n")
-    os.system("python predict.py")
+    os.system("python live_predict.py")
