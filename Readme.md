@@ -101,7 +101,7 @@ Offers datasets for letters, numbers and common phrases
 - Fixing bugs
 - Create a presentation
 
-## 6.0 Acronyms
+## 5.0 Acronyms
 ASL — American Sign Language <br>
 ML — Machine Learning <br>
 CNN — Convolutional Neural Network <br>
