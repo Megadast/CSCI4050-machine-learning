@@ -124,7 +124,7 @@ if __name__ == "__main__":
         lr=1e-4
     )
 
-    maxEpochs = 15
+    maxEpochs = 6
     print(f"[main] Beginning training - epochs: {maxEpochs}")
 
     bestValAcc = 0
