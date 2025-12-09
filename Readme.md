@@ -45,11 +45,11 @@ PredictionOutput --> UserInterface
 ```
   
 ### 1.1 Project Requirements and Specifications   
-- Implement automated dataset downloading using Kaggle API
+- Implement automated dataset downloading using Roboflow API
 - Preprocess images using PyTorch transforms
 - Train a CNN classifier capable of recognizing ASL (American Sign Language)
 - Build a prediction pipeline that supports folder-based batch testing
-- Implement simple automatic hand detection using OpenCV
+- Implement simple automatic hand detection using Mediapipe
 - Real-time recognition
 
 2.0 Libraries Required
@@ -70,29 +70,22 @@ image IO
 simple hand detection & cropping
 
 2.6 python-dotenv <br>
-Kaggle API credential loading
+Roboflow API credential loading
 
-2.7 kaggle <br>
+2.7 Roboflow <br>
 dataset downloading
 
-2.8 scikit-learn<br>
-evaluation metrics
-</b>
-
-### 3.0 Dataset(s)
-Dataset 1 (Current): https://www.kaggle.com/datasets/prathumarikeri/american-sign-language-09az <br>
-This one is good and offers from A-Z and 0-9 in Sign Language. Perfect for ML training with picture <br>
-Posssible Dataset 2:https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 <br>
-This one is also very good and offers an even wider range of Sign Language, but it might be difficult to work with, and work better with pure AI instead. <br>
-<br>
+### 3.0 Dataset
+https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 <br>
+Offers datasets for letters, numbers and common phrases 
 
 ## 4.0 Integration 
 
 ### 4.1 Phase One — Dataset + Baseline Model
-- Implemented automatic Kaggle dataset download / extraction
+- Implemented automatic Roboflow dataset download / extraction
 - Loaded dataset using PyTorch's ImageFolder
-- Filtered classes to only 0–9 for proof of concept
-- Built a simple Convolutional Neural Network
+- Filtered classes based on labels found in dataset
+- Built a Convolutional Neural Network based on the ResNet18 architecture
 - Trained with adjustable epoch controls and live progress output
 
 ### 4.2 Phase Two — Prediction Pipeline
@@ -100,23 +93,13 @@ This one is also very good and offers an even wider range of Sign Language, but 
 - Implemented sorted testing using /test/ directory
 - Added basic hand cropping
   - Use of HSV for skin detection
-- Try to solve issue when using real photos
 - Reports per-image predictions and test accuracy
 - Enables quick evaluation with real-world photos
 
-### 4.3 Phase three
-- Fixing bugs
-- Add real-time implementation
-
-### 4.4 Phase four
+### 4.3 Phase Three - Project Submission
 - Double-checking
-- Fixing bufs
+- Fixing bugs
 - Create a presentation
-
-### 5.0 Firmware code   
-
-### 5.1 main.py
-stuff <br>
 
 ## 6.0 Acronyms
 ASL — American Sign Language <br>
@@ -125,11 +108,9 @@ CNN — Convolutional Neural Network <br>
 HSV — Hue Saturation Value (color space used in skin detection) <br>
 
 ## References
-Kaggle ASL Dataset:
-https://www.kaggle.com/datasets/prathumarikeri/american-sign-language-09az <br>
 Roboflow ASL Dataset:
 https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 <br>
 PyTorch Documentation:
 https://pytorch.org <br>
-OpenCV Documentation:
-https://docs.opencv.org <br>
+MediaPipe Documentation:
+https://ai.google.dev/edge/mediapipe/solutions/guide <br>
