@@ -8,3 +8,4 @@ __pycache__/
 data/
 models/
 data_downloaded/
+test_output/

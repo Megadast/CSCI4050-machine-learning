@@ -1,5 +1,7 @@
-
-# Run real-time ASL predictions from a webcam. Press 'q' to quit the window.
+'''
+live_predict.py
+Run real-time ASL predictions from a webcam. Press 'q' to quit the window.
+'''
 import argparse
 import time
 import json

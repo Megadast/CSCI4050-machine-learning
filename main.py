@@ -1,7 +1,7 @@
 """
 main.py
 ML project about ASL image recognition
-Dataset used: https://www.kaggle.com/datasets/prathumarikeri/american-sign-language-09az/data
+Dataset used: https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1
 """
 
 import os
@@ -41,7 +41,7 @@ def trainOneEpoch(model, loader, optimizer, criterion, device):
     lossTotal = 0.0
     accTotal = 0.0
 
-    print("[main] Starting training epoch...")
+    print("[main] Starting training epoch")
 
     for batchIndex, (images, labels) in enumerate(loader):
         images, labels = images.to(device), labels.to(device)
@@ -73,7 +73,7 @@ def evaluate(model, loader, criterion, device):
     yTrue = []
     yPred = []
 
-    print("[main] Starting validation...", flush=True)
+    print("[main] Starting validation", flush=True)
 
     with torch.no_grad():
         for batchIndex, (images, labels) in enumerate(loader):
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
     #STEP 2 — check cropped otherwise run preprocessing
     if not os.path.isdir("data"):
-        print("[main] Cropped dataset not found. Running preprocess_coco.py...")
+        print("[main] Cropped dataset not found. Running preprocess_coco.py")
         os.system("python preprocess_coco.py")
     else:
         print("[main] Cropped dataset found. Skipping preprocessing.")
@@ -124,8 +124,8 @@ if __name__ == "__main__":
         lr=1e-4
     )
 
-    maxEpochs = 6
-    print(f"[main] Beginning training — epochs: {maxEpochs}")
+    maxEpochs = 15
+    print(f"[main] Beginning training - epochs: {maxEpochs}")
 
     bestValAcc = 0
 
@@ -146,7 +146,7 @@ if __name__ == "__main__":
             os.makedirs("models", exist_ok=True)
             savePath = "models/asl_best.pth"
             torch.save(model.state_dict(), savePath)
-            print(f"[main] Saved best model → {savePath}")
+            print(f"[main] Saved best model -> {savePath}")
 
     print("\n[main] Training complete — running prediction tests...\n")
-    os.system("python live_predict.py")
+    os.system("python predict.py")

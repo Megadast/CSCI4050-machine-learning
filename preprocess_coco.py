@@ -53,7 +53,7 @@ def processSplit(splitName):
 if __name__ == "__main__":
     ensureDir(OUT_DIR)
 
-    for split in ["train", "valid", "test"]:
-        processSplit(split)
+for split in ["train", "valid"]:
+    processSplit(split)
 
     print("[preprocess] Done. Cropped data stored in 'data/'")

@@ -1,4 +1,5 @@
 #utils.py
+
 import os
 import shutil
 from dotenv import load_dotenv
@@ -33,7 +34,7 @@ def downloadAslDataset():
 
     ds = version.download("coco")
 
-    # Rename folder to data_downloaded/
+    #Rename folder to data_downloaded/
     folderName = ds.location
     if os.path.isdir(folderName):
         os.rename(folderName, DEFAULT_DOWNLOADED)

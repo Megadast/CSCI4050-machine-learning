@@ -16,7 +16,7 @@ class MediaPipeHandDetector:
         detectionConfidence=0.5,
         trackingConfidence=0.5,
         static_image_mode=True):
-        # Allow caller to choose static_image_mode (False is better for video)
+        #Allow caller to choose static_image_mode (False is better for video)
         self.hands = mpHands.Hands(
             static_image_mode=static_image_mode,
             max_num_hands=maxHands,
@@ -60,10 +60,10 @@ class MediaPipeHandDetector:
             hand_height = yMax - yMin
             max_dim = max(hand_width, hand_height)
             
-            # Add 30% padding around hand for context
+            #Add 30% padding around hand for context
             pad = int(0.3 * max_dim)
             
-            # Center the hand in the padding
+            #Center the hand in the padding
             center_x = (xMin + xMax) // 2
             center_y = (yMin + yMax) // 2
             half_size = (max_dim + 2 * pad) // 2
@@ -73,7 +73,7 @@ class MediaPipeHandDetector:
             yMin = max(0, center_y - half_size)
             yMax = min(h, center_y + half_size)
             
-            # Ensure we have a valid crop
+            #Ensure we have a valid crop
             if xMax <= xMin or yMax <= yMin:
                 continue
 
