@@ -19,7 +19,7 @@
   - [4.2 Phase Two](#42-phase-two)
   - [4.3 Phase Three](#43-phase-three)
 - [5.0 Acronyms](#50-acronyms)
-- [6.0 References](#60-references)
+- [6.0 References](#references)
 
 ## List of Figures   
 [Figure 1: Gantt Chart 2023](#figure-1-gantt-chart-2023)     
