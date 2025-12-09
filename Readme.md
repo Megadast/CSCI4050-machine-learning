@@ -52,28 +52,28 @@ PredictionOutput --> UserInterface
 - Implement simple automatic hand detection using Mediapipe
 - Real-time recognition
 
-2.0 Libraries Required <br>
+## 2.0 Libraries Required <br>
 
-2.1 PyTorch <br>
-model training and inference
+### 2.1 PyTorch <br>
+Model training and inference
 
-2.2 torchvision <br>
-transformations, datasets
+### 2.2 torchvision <br>
+Transformations, datasets
 
-2.3 numpy <br>
-numerical operations
+### 2.3 numpy <br>
+Numerical operations
 
-2.4 Pillow (PIL) <br>
-image IO
+### 2.4 Pillow (PIL) <br>
+Image IO
 
-2.5 OpenCV <br>
-simple hand detection & cropping
+### 2.5 Mediapipe <br>
+Simple hand detection 
 
-2.6 python-dotenv <br>
+### 2.6 python-dotenv <br>
 Roboflow API credential loading
 
-2.7 Roboflow <br>
-dataset downloading
+### 2.7 Roboflow <br>
+Dataset downloading
 
 ### 3.0 Dataset
 https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 <br>
