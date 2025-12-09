@@ -105,6 +105,41 @@ ML — Machine Learning <br>
 CNN — Convolutional Neural Network <br>
 HSV — Hue Saturation Value (color space used in skin detection) <br>
 
+## 6.0 How to Run
+
+### Prerequisites
+- Python 3.8 or higher
+- pip package manager
+
+### Installation and Execution
+
+1. Install required dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. Set up environment variables (create a `.env` file in the project root):
+```
+ROBOFLOW_API_KEY=your_api_key_here
+ROBOFLOW_WORKSPACE=your_workspace
+ROBOFLOW_PROJECT=your_project_name
+ROBOFLOW_VERSION=1
+```
+(You'll need an API key from Roboflow to access the dataset for our program, instructions on how to do so can be found here: https://docs.roboflow.com/developer/authentication/find-your-roboflow-api-key)
+
+3. Run the complete pipeline:
+```bash
+python main.py
+```
+
+This will:
+- Download the ASL dataset from Roboflow (if not already downloaded)
+- Preprocess images using MediaPipe hand detection
+- Train the model on MediaPipe-aligned crops
+- Save the best model to `models/asl_best.pth`
+- Test the model using the images found in `/data_downloaded/test`
+- Create visualized output for how the images are processed with Mediapipe in `/real/output` 
+
 ## References
 Roboflow ASL Dataset:
 https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 <br>
