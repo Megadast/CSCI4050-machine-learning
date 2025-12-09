@@ -52,7 +52,7 @@ PredictionOutput --> UserInterface
 - Implement simple automatic hand detection using Mediapipe
 - Real-time recognition
 
-2.0 Libraries Required
+2.0 Libraries Required <br>
 
 2.1 PyTorch <br>
 model training and inference
