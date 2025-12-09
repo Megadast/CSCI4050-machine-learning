@@ -19,10 +19,13 @@
   - [4.2 Phase Two](#42-phase-two)
   - [4.3 Phase Three](#43-phase-three)
 - [5.0 Acronyms](#50-acronyms)
-- [6.0 References](#references)
+- [6.0 How to Run](#60-how-to-run)
+- [7.0 References](#70-references)
 
 ## List of Figures   
-[Figure 1: Gantt Chart 2023](#figure-1-gantt-chart-2023)     
+[Figure 1 Final Output](#figure-1-final-output)
+
+[Figure 2 Real Annotated](#figure-2-real-annotated)
 
 ### 1.0 Design proposal
 This project involves the development of a machine learning model capable of recognizing hand gestures connected to American Sign Language (ASL).
@@ -35,10 +38,11 @@ The idea is to use static images at first and try to expand into live translatio
 
 ```mermaid
 flowchart LR
-InputImage --> Preprocessing
-Preprocessing --> HandCrop
-HandCrop --> CNNModel
-CNNModel --> PredictionOutput
+InputImage --> MediaPipeHandDetection
+MediaPipeHandDetection --> COCOCropper
+COCOCropper --> Preprocessing
+Preprocessing --> ResNet18Classifier
+ResNet18Classifier --> PredictionOutput
 PredictionOutput --> UserInterface
 ```
   
@@ -77,6 +81,15 @@ Dataset downloading
 https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 <br>
 Offers datasets for letters, numbers and common phrases 
 
+### 3.1 Model Class List (47 total) <br>
+Digits (10) <br>
+0–9 <br>
+Alphabet (26) <br>
+A–Z <br>
+Phrases (11) <br>
+ExcuseMe, Food, Hello, Help, House, I Love You, Internet, No, Please, ThankYou, Yes <br>
+Total model output classes -> 47
+
 ## 4.0 Integration 
 
 ### 4.1 Phase One — Dataset + Baseline Model
@@ -85,19 +98,24 @@ Offers datasets for letters, numbers and common phrases
 - Filtered classes based on labels found in dataset
 - Built a Convolutional Neural Network based on the ResNet18 architecture
 - Trained with adjustable epoch controls and live progress output
+- Saved best model as models/asl_best.pth
 
 ### 4.2 Phase Two — Prediction Pipeline
 - Added predict.py to evaluate any image or folder of images
+- Added hand cropping as preprocess_coco.py to:
+  - Read COCO annotations
+  - Crop bounding boxes
+  - Organize images by class
 - Implemented sorted testing using /test/ directory
-- Added basic hand cropping
-  - Use of HSV for skin detection
 - Reports per-image predictions and test accuracy
 - Enables quick evaluation with real-world photos
 
 ### 4.3 Phase Three - Project Submission
-- Double-checking
-- Fixing bugs
-- Create a presentation
+- Code restructuring
+- Bug fixes + stability improvements
+- Performance optimization
+- Presentation slides & documentation
+- Final project demonstration
 
 ## 5.0 Acronyms
 ASL — American Sign Language <br>
@@ -138,9 +156,16 @@ This will:
 - Train the model on MediaPipe-aligned crops
 - Save the best model to `models/asl_best.pth`
 - Test the model using the images found in `/data_downloaded/test`
-- Create visualized output for how the images are processed with Mediapipe in `/real/output` 
+- Create visualized output for how the images are processed with Mediapipe in `/real/output`
 
-## References
+### Output Sample
+**Final Output**
+![Figure 1 Final Output](https://github.com/Megadast/CSCI4050-machine-learning/blob/main/screenshots/final.png?raw=true)
+
+**Annoted output**
+![Figure 2 Real Annotated](https://github.com/Megadast/CSCI4050-machine-learning/blob/main/screenshots/annoted%20real%20images.jpg?raw=true)
+
+## 7.0 References
 Roboflow ASL Dataset:
 https://universe.roboflow.com/sign-recognintion/sign-recoginition/dataset/1 <br>
 PyTorch Documentation:
